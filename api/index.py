@@ -6,12 +6,21 @@ app = Flask(__name__)
 
 HTML = """
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FB Video Downloader</title>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Video Downloader</title>
 
     <style>
+
         * {
             box-sizing: border-box;
         }
@@ -19,41 +28,58 @@ HTML = """
         body {
             margin: 0;
             min-height: 100vh;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             padding: 20px;
 
-            font-family: Arial, sans-serif;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
             background: #f1f5f9;
         }
 
         .card {
             width: 100%;
             max-width: 450px;
-            background: white;
+
             padding: 30px;
+
+            background: white;
+
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,.1);
+
+            box-shadow:
+                0 10px 40px rgba(0,0,0,.10);
         }
 
         h1 {
+            margin: 0;
             text-align: center;
-            margin-bottom: 10px;
+            font-size: 28px;
         }
 
-        p {
+        .subtitle {
             text-align: center;
             color: #64748b;
-            margin-bottom: 25px;
+            margin: 10px 0 25px;
         }
 
         input {
             width: 100%;
+
             padding: 15px;
+
             border: 1px solid #cbd5e1;
             border-radius: 10px;
+
             font-size: 16px;
+
             outline: none;
         }
 
@@ -63,7 +89,9 @@ HTML = """
 
         button {
             width: 100%;
+
             margin-top: 15px;
+
             padding: 15px;
 
             border: none;
@@ -73,7 +101,7 @@ HTML = """
             color: white;
 
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
 
             cursor: pointer;
         }
@@ -84,8 +112,12 @@ HTML = """
 
         #status {
             margin-top: 20px;
+
             text-align: center;
+
             display: none;
+
+            line-height: 1.5;
         }
 
         .error {
@@ -95,28 +127,39 @@ HTML = """
         .success {
             color: #16a34a;
         }
+
+        .loading {
+            color: #2563eb;
+        }
+
     </style>
+
 </head>
+
 
 <body>
 
 <div class="card">
 
-    <h1>📥 FB Downloader</h1>
+    <h1>📥 Video Downloader</h1>
 
-    <p>
-        Paste a Facebook video or Reel URL
-    </p>
+    <div class="subtitle">
+        Facebook • YouTube • TikTok
+    </div>
+
 
     <input
         id="url"
         type="url"
-        placeholder="Paste Facebook URL here"
+        placeholder="Paste video URL..."
+        autocomplete="off"
     >
+
 
     <button id="downloadBtn">
         Download Video
     </button>
+
 
     <div id="status"></div>
 
@@ -125,119 +168,147 @@ HTML = """
 
 <script>
 
-const button = document.getElementById("downloadBtn");
-const input = document.getElementById("url");
-const status = document.getElementById("status");
+const button =
+    document.getElementById("downloadBtn");
+
+const input =
+    document.getElementById("url");
+
+const status =
+    document.getElementById("status");
+
+
+function showStatus(message, type) {
+
+    status.style.display = "block";
+
+    status.className = type;
+
+    status.textContent = message;
+
+}
 
 
 button.addEventListener("click", async () => {
 
     const url = input.value.trim();
 
+
     if (!url) {
+
         showStatus(
-            "Please paste a Facebook URL.",
+            "Please paste a video URL.",
             "error"
         );
+
         return;
     }
 
 
     button.disabled = true;
-    button.innerText = "Getting video...";
+
+    button.textContent =
+        "Finding video...";
+
 
     showStatus(
-        "Finding video...",
-        ""
+        "Getting video information...",
+        "loading"
     );
 
 
     try {
 
-        const response = await fetch("/api/video", {
+        const response =
+            await fetch("/download", {
 
-            method: "POST",
+                method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
 
-            body: JSON.stringify({
-                url: url
-            })
+                body: JSON.stringify({
+                    url: url
+                })
 
-        });
+            });
 
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
 
         if (!response.ok) {
+
             throw new Error(
-                data.error || "Download failed."
+                data.error ||
+                "Download failed."
             );
+
         }
 
 
         showStatus(
-            "Video found! Starting download...",
+            "Video found. Starting download...",
             "success"
         );
 
 
         /*
-         * Tell the browser to download the
-         * returned video.
+         * Open the direct media URL.
+         *
+         * The phone/browser handles
+         * the actual download.
          */
-        window.location.href = data.url;
+
+        window.location.href =
+            data.url;
 
 
     } catch (error) {
 
         showStatus(
-            error.message,
+            error.message ||
+            "Something went wrong.",
             "error"
         );
 
-    } finally {
-
-        button.disabled = false;
-        button.innerText = "Download Video";
-
     }
 
+
+    button.disabled = false;
+
+    button.textContent =
+        "Download Video";
+
 });
-
-
-function showStatus(message, type) {
-
-    status.style.display = "block";
-    status.innerText = message;
-
-    status.className = type;
-
-}
 
 </script>
 
 </body>
+
 </html>
 """
 
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
+
     return render_template_string(HTML)
 
 
-@app.route("/api/video", methods=["POST"])
-def get_video():
+@app.route("/download", methods=["POST"])
+def download():
 
-    data = request.get_json()
+    data = request.get_json(silent=True)
+
 
     if not data:
+
         return jsonify({
-            "error": "No data received."
+            "error": "Invalid request."
         }), 400
 
 
@@ -245,39 +316,39 @@ def get_video():
 
 
     if not url:
-        return jsonify({
-            "error": "Please provide a Facebook URL."
-        }), 400
 
-
-    if "facebook.com" not in url.lower():
         return jsonify({
-            "error": "Please enter a Facebook URL."
+            "error":
+                "Please provide a video URL."
         }), 400
 
 
     try:
 
-        ydl_opts = {
+        print("Processing URL:", url)
+
+
+        options = {
 
             # Best SINGLE file containing
             # video + audio.
             #
             # No FFmpeg required.
+
             "format": "best",
 
-            "quiet": True,
+            "quiet": False,
 
-            "no_warnings": True,
+            "no_warnings": False,
 
             "noplaylist": True,
 
-            # We only want information.
             "skip_download": True,
+
         }
 
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(options) as ydl:
 
             info = ydl.extract_info(
                 url,
@@ -291,55 +362,60 @@ def get_video():
         if not video_url:
 
             return jsonify({
-                "error": "No downloadable video found."
+                "error":
+                    "No downloadable video was found."
             }), 404
 
 
         return jsonify({
+
             "url": video_url,
-            "title": info.get(
-                "title",
-                "facebook_video"
-            )
+
+            "title":
+                info.get(
+                    "title",
+                    "video"
+                )
+
         })
 
 
     except yt_dlp.utils.DownloadError as e:
 
-        print("yt-dlp error:", e)
+        print(
+            "yt-dlp error:",
+            repr(e)
+        )
+
 
         return jsonify({
+
             "error":
-                "Could not access this Facebook video."
+                "This video could not be accessed. "
+                "It may be private, unavailable, "
+                "login-protected, or unsupported."
+
         }), 400
 
 
     except Exception as e:
 
-        print("Error:", e)
+        print(
+            "Unexpected error:",
+            repr(e)
+        )
+
 
         return jsonify({
-            "error": "Something went wrong."
+
+            "error":
+                "Something went wrong while "
+                "processing the video."
+
         }), 500
 
 
-# IMPORTANT:
-# This makes "python index.py" actually start Flask.
-
 if __name__ == "__main__":
-
-    print("")
-    print("=" * 50)
-    print("       FACEBOOK VIDEO DOWNLOADER")
-    print("=" * 50)
-    print("")
-    print("Open this URL in your browser:")
-    print("")
-    print("http://127.0.0.1:5000")
-    print("")
-    print("Press CTRL+C to stop.")
-    print("=" * 50)
-    print("")
 
     app.run(
         host="0.0.0.0",
