@@ -324,11 +324,19 @@ def extract_best_media_url(info):
 
 
 @app.route("/", methods=["GET"])
+@app.route("/api", methods=["GET"])
+@app.route("/api/", methods=["GET"])
+@app.route("/api/index", methods=["GET"])
+@app.route("/api/index.py", methods=["GET"])
 def home():
     return render_template_string(HTML)
 
 
 @app.route("/download", methods=["POST"])
+@app.route("/api/download", methods=["POST"])
+@app.route("/api", methods=["POST"])
+@app.route("/api/index", methods=["POST"])
+@app.route("/api/index.py", methods=["POST"])
 def download():
     data = request.get_json(silent=True)
 

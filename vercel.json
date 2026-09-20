@@ -1,8 +1,12 @@
 {
   "rewrites": [
     {
+      "source": "/download",
+      "destination": "/api/index"
+    },
+    {
       "source": "/(.*)",
-      "destination": "/api/index.py"
+      "destination": "/api/index"
     }
   ]
 }
