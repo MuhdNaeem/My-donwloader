@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pulse Downloader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+
+    <header class="top">
+      <div class="brand">
+        <span class="logo">▶</span>
+        <div>
+          <strong>Pulse</strong>
+          <p>YouTube · TikTok · Facebook · more</p>
+        </div>
+      </div>
+      <div class="status-pills" id="statusPills"></div>
+    </header>
+
+    <main>
+      <section class="hero card">
+        <h1>Save any public video in a few clicks.</h1>
+        <p class="lede">
+          Paste a link, pick a quality, and download locally. Works best with
+          public videos you have the right to keep.
+        </p>
+
+        <form id="probeForm" class="url-row">
+          <input
+            id="urlInput"
+            type="url"
+            placeholder="https://www.youtube.com/watch?v=…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" class="ghost" id="pasteBtn">Paste</button>
+          <button type="submit" class="primary" id="probeBtn">Fetch</button>
+        </form>
+        <p class="hint" id="formHint">Supports YouTube, TikTok, Facebook, Instagram, X, Reddit, and others via yt-dlp. Optional: save cookies.txt beside main.py if a site asks you to sign in.</p>
+        <label class="advanced">
+          Proxy (optional)
+          <input id="proxyInput" type="text" placeholder="http://127.0.0.1:7890" autocomplete="off" />
+        </label>
+      </section>
+
+      <section class="layout">
+        <article class="card preview" id="preview">
+          <div class="empty" id="emptyState">
+            <div class="empty-icon">◎</div>
+            <h2>Nothing queued yet</h2>
+            <p>Drop in a video URL to see the title, thumbnail, and available qualities.</p>
+          </div>
+
+          <div class="preview-body hidden" id="previewBody">
+            <div class="thumb-wrap">
+              <img id="thumb" alt="Video thumbnail" />
+              <span class="badge" id="platformBadge"></span>
+              <span class="duration" id="duration"></span>
+            </div>
+            <div class="meta">
+              <h2 id="title"></h2>
+              <p id="uploader"></p>
+              <p class="note" id="playlistNote"></p>
+              <div class="actions">
+                <label>
+                  Quality
+                  <select id="quality"></select>
+                </label>
+                <button class="primary" id="downloadBtn">Download</button>
+                <button class="ghost danger hidden" id="cancelBtn">Cancel</button>
+              </div>
+              <div class="progress hidden" id="progressBox">
+                <div class="bar"><span id="barFill"></span></div>
+                <div class="progress-meta">
+                  <span id="progressLabel">Queued</span>
+                  <span id="progressPct">0%</span>
+                </div>
+              </div>
+              <p class="error hidden" id="errorBox"></p>
+              <p class="success hidden" id="successBox"></p>
+            </div>
+          </div>
+        </article>
+
+        <aside class="card history">
+          <div class="history-head">
+            <h2>Recent saves</h2>
+            <button class="ghost" id="openFolderBtn">Open folder</button>
+          </div>
+          <ul id="historyList"></ul>
+        </aside>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

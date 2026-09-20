@@ -1,0 +1,13 @@
+downloads/
+__pycache__/
+*.pyc
+.venv/
+venv/
+cookies.txt
+*.mp4
+*.webm
+*.mkv
+*.mp3
+ffmpeg/
+.DS_Store
+Thumbs.db
