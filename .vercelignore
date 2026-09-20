@@ -1,0 +1,9 @@
+main.py
+static/
+downloads/
+ffmpeg/
+start.bat
+__pycache__/
+*.pyc
+cookies.txt
+requirements-desktop.txt
