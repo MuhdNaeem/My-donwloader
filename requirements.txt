@@ -4,3 +4,4 @@ yt-dlp>=2026.8.19
 curl_cffi>=0.7.0
 imageio-ffmpeg>=0.5.0
 python-multipart>=0.0.9
+Flask
