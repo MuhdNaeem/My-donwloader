@@ -830,11 +830,23 @@ HTML = """<!DOCTYPE html>
                 const proxy = proxyInput.value.trim();
                 const response = await fetch("/download", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
                     body: JSON.stringify({ url: url, proxy: proxy || null })
                 });
 
-                const data = await response.json();
+                const contentType = response.headers.get("content-type") || "";
+                let data;
+                if (contentType.includes("application/json")) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+                    const serverMsg = titleMatch ? titleMatch[1] : (text.slice(0, 140) || "Server returned non-JSON response");
+                    throw new Error(`Server returned error (${response.status}): ${serverMsg}`);
+                }
 
                 if (!response.ok) {
                     throw new Error(data.error || "Failed to process video.");
@@ -1403,12 +1415,33 @@ def resolve_ytdlp(url: str, platform: str = "generic", custom_proxy: str = None)
     }
 
 
+@app.errorhandler(400)
+@app.errorhandler(404)
+@app.errorhandler(405)
+@app.errorhandler(500)
+def handle_http_errors(e):
+    # Ensure any request directed to API endpoints or expecting JSON receives JSON, not HTML
+    wants_json = (
+        request.path.startswith(("/download", "/api", "/info", "/stream"))
+        or request.is_json
+        or "application/json" in request.headers.get("Accept", "")
+    )
+    if wants_json:
+        code = getattr(e, "code", 500)
+        desc = getattr(e, "description", str(e))
+        return jsonify({"error": desc, "status": code}), code
+    return render_template_string(HTML)
+
+
 @app.route("/", methods=["GET"])
 @app.route("/api", methods=["GET"])
 @app.route("/api/", methods=["GET"])
 @app.route("/api/index", methods=["GET"])
 @app.route("/api/index.py", methods=["GET"])
 def home():
+    # If a GET request to / or /api/index has ?url=..., process it as a download request
+    if request.args.get("url"):
+        return download()
     return render_template_string(HTML)
 
 
@@ -1473,17 +1506,24 @@ def stream_proxy():
         return jsonify({"error": f"Failed to stream media: {str(e)}"}), 502
 
 
-@app.route("/download", methods=["POST"])
-@app.route("/info", methods=["POST"])
-@app.route("/api/download", methods=["POST"])
-@app.route("/api/info", methods=["POST"])
+@app.route("/download", methods=["GET", "POST"])
+@app.route("/info", methods=["GET", "POST"])
+@app.route("/api/download", methods=["GET", "POST"])
+@app.route("/api/info", methods=["GET", "POST"])
 @app.route("/api", methods=["POST"])
 @app.route("/api/index", methods=["POST"])
 @app.route("/api/index.py", methods=["POST"])
 def download():
-    data = request.get_json(silent=True) or {}
-    url = data.get("url", "").strip()
-    proxy = data.get("proxy", "").strip() or None
+    data = {}
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+    elif request.form:
+        data = request.form.to_dict()
+        
+    url = data.get("url") or request.args.get("url", "")
+    url = url.strip()
+    proxy = data.get("proxy") or request.args.get("proxy", "")
+    proxy = proxy.strip() if proxy else None
     
     if not url:
         return jsonify({"error": "Please paste a video URL."}), 400
