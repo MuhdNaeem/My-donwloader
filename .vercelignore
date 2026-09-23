@@ -3,6 +3,8 @@ static/
 downloads/
 ffmpeg/
 start.bat
+start-vercel-local.bat
+*.bat
 __pycache__/
 *.pyc
 cookies.txt

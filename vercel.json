@@ -1,7 +1,15 @@
 {
   "rewrites": [
     {
+      "source": "/stream",
+      "destination": "/api/index"
+    },
+    {
       "source": "/download",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/info",
       "destination": "/api/index"
     },
     {
